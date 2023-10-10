@@ -5,6 +5,7 @@ module.exports = gql`
     username: String
     createdAt: String
     token: String
+    ID: String
   }
   type Message {
     uuid: String!
@@ -29,9 +30,12 @@ module.exports = gql`
   type Mutation {
     register(
       username: String!
-      email: String!
       password: String!
       confirmPassword: String!
+    ): User!
+    login(
+      username:String!
+      password:String!
     ): User!
     sendMessage(to: String!, content: String!): Message!
     reactToMessage(uuid: String!, content: String!): Reaction!

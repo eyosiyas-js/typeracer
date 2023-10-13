@@ -1,4 +1,5 @@
 const usersResolver = require("./users.js");
+const roomsResolver = require("./room.js");
 
 module.exports = {
   Query: {
@@ -6,5 +7,6 @@ module.exports = {
   },
   Mutation: {
     ...usersResolver.Mutation,
+    ...roomsResolver.Mutation
   },
 };

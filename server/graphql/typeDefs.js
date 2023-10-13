@@ -7,6 +7,17 @@ module.exports = gql`
     token: String
     ID: String
   }
+  type member {
+    ID: String
+  }
+  type Room {
+    name: String!
+    password: String
+    ID: String!
+    status: Boolean!
+    owner: String!
+    members: [member]!
+  }
   type Message {
     uuid: String!
     content: String!
@@ -33,10 +44,9 @@ module.exports = gql`
       password: String!
       confirmPassword: String!
     ): User!
-    login(
-      username:String!
-      password:String!
-    ): User!
+    login(username: String!, password: String!): User!
+    createRoom(name: String!, password: String!): Room!
+    joinRoom(name:String!,password:String!): Room!
     sendMessage(to: String!, content: String!): Message!
     reactToMessage(uuid: String!, content: String!): Reaction!
   }

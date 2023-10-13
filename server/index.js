@@ -2,10 +2,11 @@ const { ApolloServer } = require("apollo-server");
 const mongoose = require("mongoose");
 const resolvers = require("./graphql/resolvers");
 const typeDefs = require("./graphql/typeDefs");
-
+const contextMiddleware =  require("./utils/contextMiddleware.js")
 const server = new ApolloServer({
   typeDefs,
   resolvers,
+  context: contextMiddleware,
   subscriptions: { path: "/" },
 });
 
@@ -18,4 +19,3 @@ server.listen().then((server) => {
   console.log(`🚀 Server ready at ${server.url}`);
   // consolae.log(`🚀 Subscriptions ready at ${server.subscriptionsUrl}`);
 });
-

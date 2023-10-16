@@ -10,6 +10,12 @@ module.exports = gql`
   type member {
     ID: String
   }
+
+  type Rank {
+    ID: String!
+    Rank: String!
+    roomId: String!
+  }
   type Room {
     name: String!
     password: String
@@ -46,12 +52,12 @@ module.exports = gql`
     ): User!
     login(username: String!, password: String!): User!
     createRoom(name: String!, password: String!): Room!
-    joinRoom(name:String!,password:String!): Room!
+    joinRoom(name: String!, password: String!): Room!
     sendMessage(to: String!, content: String!): Message!
     reactToMessage(uuid: String!, content: String!): Reaction!
+    sendRank(ID: String!, roomId: String!, Rank: String!): Rank!
   }
   type Subscription {
-    newMessage: Message!
-    newReaction: Reaction!
+    newRank(ID: String!, Rank: String!, roomId: String!): Rank!
   }
 `;

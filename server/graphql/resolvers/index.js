@@ -7,6 +7,9 @@ module.exports = {
   },
   Mutation: {
     ...usersResolver.Mutation,
-    ...roomsResolver.Mutation
+    ...roomsResolver.Mutation,
+  },
+  Subscription: {
+    ...roomsResolver.Subscription,
   },
 };

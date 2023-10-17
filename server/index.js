@@ -8,68 +8,46 @@ const { makeExecutableSchema } = require("@graphql-tools/schema");
 const resolvers = require("./graphql/resolvers");
 const typeDefs = require("./graphql/typeDefs");
 const contextMiddleware = require("./utils/contextMiddleware.js");
+const mongoose = require("mongoose");
+const { verify } = require("jsonwebtoken");
+
 (async () => {
-  const pubsub = new PubSub();
   const app = express();
   const httpServer = createServer(app);
-
-  //   const typeDefs = gql`
-  //   type Query {
-  //     viewMessages: [Message!]
-  //   }
-  //   type Mutation {
-  //     sendMessage(name: String, content: String): Message!
-  //   }
-  //   type Subscription {
-  //     receiveMessage: Message!
-  //   }
-  //   type Message {
-  //       id: ID!
-  //       name: String!
-  //       content: String
-  //   }
-  // `;
-
-  let messages = [];
-  // const resolvers = {
-  //   Query: {
-  //     viewMessages() {
-  //       return messages;
-  //     },
-  //   },
-  //   Mutation: {
-  //     sendMessage: (parent, { name, content }) => {
-  //       const id = messages.length;
-  //       var new_message = {
-  //           id,
-  //           name,
-  //           content
-  //       }
-  //       messages.push(new_message);
-  //       pubsub.publish("MessageService", {receiveMessage: new_message});
-  //       return new_message;
-  //     },
-  //   },
-  //   Subscription: {
-  //     receiveMessage: {
-  //       subscribe: () => pubsub.asyncIterator(["MessageService"]),
-  //     },
-  //   },
-  // };
 
   const schema = makeExecutableSchema({ typeDefs, resolvers });
 
   const server = new ApolloServer({
     schema,
+    context: contextMiddleware,
   });
   await server.start();
   server.applyMiddleware({ app });
 
+  const onConnect = (connectionParams, webSocket) => {
+    const token = connectionParams.Authorization || "";
+    const user = verify(token, "mykey"); // Replace 'your-secret-key' with your secret key
+
+    return { user };
+
+    throw new Error("Unauthorized");
+  };
+
   SubscriptionServer.create(
-    { schema, execute, subscribe },
-    { server: httpServer, path: "/" }
+    {
+      schema,
+      execute,
+      subscribe,
+      onConnect,
+    },
+    { server: httpServer, path: "/graphql" }
   );
   const PORT = 4000;
+  const MONGODB = "mongodb://localhost:27017/typeracer";
+  mongoose.connect(MONGODB, { useNewUrlParser: true }).then(() => {
+    console.log("mongodb connected");
+  });
+
   httpServer.listen(PORT, () => {
     console.log(
       `🚀 Query endpoint ready at http://localhost:${PORT}${server.graphqlPath}`

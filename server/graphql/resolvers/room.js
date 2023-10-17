@@ -4,6 +4,10 @@ const bcrypt = require("bcrypt");
 const { v4: uuidv4 } = require("uuid");
 const { withFilter } = require("graphql-subscriptions");
 
+const { PubSub } = require("graphql-subscriptions");
+
+const pubsub = new PubSub();
+
 module.exports = {
   Query: {},
   Mutation: {
@@ -63,7 +67,7 @@ module.exports = {
       return room;
     },
 
-    async sendRank(_, { roomId, ID, Rank }, { pubsub, user }) {
+    async sendRank(_, { roomId, ID, Rank }, { user }) {
       if (!user) throw new AuthenticationError("Not authorized");
 
       const room = await Room.findOne({ ID: roomId });
@@ -76,31 +80,33 @@ module.exports = {
         }
       });
 
+      console.log(pubsub);
+
       pubsub.publish(`NEW_RANK_${room.ID}`, {
-        newRank: Rank,
-        ID: ID,
-        roomId: roomId,
+        Rank,
+        ID,
+        roomId,
       });
-      return Rank;
+      return { ID: user.ID, Rank, roomId: room.ID };
     },
   },
 
   Subscription: {
     newRank: {
       subscribe: withFilter(
-        (_, { roomId, ID, Rank }, { pubsub, user }) => {
+        (_, { roomId, ID, Rank }, { user }) => {
           if (!user) throw new AuthenticationError("Unauthenticated");
 
           // Subscribe to the channel specific to the room
+          console.log(user);
+
           return pubsub.asyncIterator(`NEW_RANK_${roomId}`);
         },
-        ({ newRank, ID, roomId }, _, { user }) => {
+        async ({ Rank, ID, roomId }, _, { user }) => {
           // Check if the authenticated user is a member of the room
-          if (newRank.roomId && newRank.roomId === roomId) {
-            return { Rank: newRank, ID: ID, roomId: roomId };
-          }
+          console.log(Rank);
 
-          return false;
+          return true;
         }
       ),
     },

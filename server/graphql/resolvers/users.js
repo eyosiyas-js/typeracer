@@ -6,10 +6,11 @@ const { v4: uuidv4 } = require("uuid");
 
 module.exports = {
   Query: {
-    async getUsers() {
+    async getUsers(_, args, { user }) {
       return [
         {
-          username: "Deju",
+          username: user.ID,
+
         },
       ];
     },

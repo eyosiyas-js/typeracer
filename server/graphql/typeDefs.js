@@ -12,9 +12,9 @@ module.exports = gql`
   }
 
   type Rank {
-    ID: String!
-    Rank: String!
-    roomId: String!
+    ID: String
+    Rank: String
+    roomId: String
   }
   type Room {
     name: String!
@@ -58,6 +58,6 @@ module.exports = gql`
     sendRank(ID: String!, roomId: String!, Rank: String!): Rank!
   }
   type Subscription {
-    newRank(ID: String!, Rank: String!, roomId: String!): Rank!
+    newRank(roomId: String!): Rank
   }
 `;

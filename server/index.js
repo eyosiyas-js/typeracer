@@ -1,59 +1,94 @@
-const { createServer } = require("http");
-const express = require("express");
+const { ApolloServer } = require("apollo-server-express");
+const { ApolloServerPluginDrainHttpServer } = require("apollo-server-core");
 const { execute, subscribe } = require("graphql");
-const { ApolloServer, gql } = require("apollo-server-express");
-const { PubSub } = require("graphql-subscriptions");
 const { SubscriptionServer } = require("subscriptions-transport-ws");
 const { makeExecutableSchema } = require("@graphql-tools/schema");
-const resolvers = require("./graphql/resolvers");
-const typeDefs = require("./graphql/typeDefs");
-const contextMiddleware = require("./utils/contextMiddleware.js");
-const mongoose = require("mongoose");
+const gql = require("graphql-tag");
+const express = require("express");
+const http = require("http");
+const { PubSub } = require("graphql-subscriptions");
 const { verify } = require("jsonwebtoken");
 
-(async () => {
+const resolvers = require("./graphql/resolvers");
+const typeDefs = require("./graphql/typeDefs");
+const mongoose = require("mongoose");
+(async function startApolloServer(typeDefs, resolvers) {
+  // Required logic for integrating with Express
   const app = express();
-  const httpServer = createServer(app);
-
+  const httpServer = http.createServer(app);
   const schema = makeExecutableSchema({ typeDefs, resolvers });
+  const pubsub = new PubSub();
+
+  // Same ApolloServer initialization as before, plus the drain plugin.
+  const contextMiddleware = ({ req, connection }) => {
+    const context = {};
+
+    if (req) {
+      // Handle HTTP request context
+      const token = req.headers.authorization;
+      if (token) {
+        const user = verify(token, "mykey");
+        context.user = user;
+      }
+    }
+
+    context.pubsub = pubsub; // Add PubSub to the context
+
+    return context;
+  };
 
   const server = new ApolloServer({
     schema,
     context: contextMiddleware,
+    plugins: [
+      ApolloServerPluginDrainHttpServer({ httpServer }),
+      {
+        async serverWillStart() {
+          return {
+            async drainServer() {
+              subscriptionServer.close();
+            },
+          };
+        },
+      },
+    ],
   });
-  await server.start();
-  server.applyMiddleware({ app });
 
-  const onConnect = (connectionParams, webSocket) => {
-    const token = connectionParams.Authorization || "";
-    const user = verify(token, "mykey"); // Replace 'your-secret-key' with your secret key
-
-    return { user };
-
-    throw new Error("Unauthorized");
-  };
-
-  SubscriptionServer.create(
+  const subscriptionServer = SubscriptionServer.create(
     {
       schema,
       execute,
       subscribe,
-      onConnect,
+
+      async onConnect(connectionParams, webSocket, context) {
+        console.log("Connected!");
+        const token = connectionParams.Authorization || "";
+        const user = verify(token, "mykey"); // Replace 'your-secret-key' with your secret key
+        return {
+          pubsub,
+          user,
+        };
+      },
+      onDisconnect(webSocket, context) {
+        console.log("Disconnected!");
+      },
     },
-    { server: httpServer, path: "/graphql" }
+    {
+      server: httpServer,
+      path: server.graphqlPath,
+    }
   );
-  const PORT = 4000;
+
+  await server.start();
+  server.applyMiddleware({
+    app,
+  });
   const MONGODB = "mongodb://localhost:27017/typeracer";
   mongoose.connect(MONGODB, { useNewUrlParser: true }).then(() => {
     console.log("mongodb connected");
   });
 
-  httpServer.listen(PORT, () => {
-    console.log(
-      `🚀 Query endpoint ready at http://localhost:${PORT}${server.graphqlPath}`
-    );
-    console.log(
-      `🚀 Subscription endpoint ready at ws://localhost:${PORT}${server.graphqlPath}`
-    );
-  });
-})();
+  // Modified server startup
+  await new Promise((resolve) => httpServer.listen({ port: 4000 }, resolve));
+  console.log(`🚀 Server ready at http://localhost:4000${server.graphqlPath}`);
+})(typeDefs, resolvers);

@@ -2,11 +2,9 @@ const { AuthenticationError, UserInputError } = require("apollo-server");
 const Room = require("../../models/Room.js");
 const bcrypt = require("bcrypt");
 const { v4: uuidv4 } = require("uuid");
-const { withFilter } = require("graphql-subscriptions");
+// const { PubSub } = require("graphql-subscriptions");
 
-const { PubSub } = require("graphql-subscriptions");
-
-const pubsub = new PubSub();
+// const pubsub = new PubSub();
 
 module.exports = {
   Query: {},
@@ -42,6 +40,9 @@ module.exports = {
       const room = await Room.findOne({ name: name });
       if (!room) throw new UserInputError("Room not found");
 
+      if (room.members.length >= 8)
+        throw new UserInputError("The room is currently full");
+
       const match = await bcrypt.compare(password, room.password);
 
       if (match) throw new UserInputError("Incorrect Credentials");
@@ -67,10 +68,21 @@ module.exports = {
       return room;
     },
 
-    async sendRank(_, { roomId, ID, Rank }, { user }) {
+    detachRoom: async (_, { roomId }, { user }) => {
+      if (!user) throw new AuthenticationError("Not authorized");
+      // const room = await Room.findOne({ ID: roomId });
+
+      await Room.updateOne(
+        { ID: roomId },
+        { $pull: { members: { ID: user.ID } } }
+      );
+      return "Successfully detached";
+    },
+
+    sendRank: async (_, { rankInfo }, { pubsub, user }) => {
       if (!user) throw new AuthenticationError("Not authorized");
 
-      const room = await Room.findOne({ ID: roomId });
+      const room = await Room.findOne({ ID: rankInfo.roomId });
 
       if (!room) return new UserInputError("Room not found");
 
@@ -80,35 +92,40 @@ module.exports = {
         }
       });
 
-      console.log(pubsub);
+      const newRank = {
+        rank: rankInfo.rank,
+        ID: user.ID,
+        roomId: rankInfo.roomId,
+      };
+      pubsub.publish(`NEW_RANK_${rankInfo.roomId}`, { newRank });
+      console.log(rankInfo);
 
-      pubsub.publish(`NEW_RANK_${room.ID}`, {
-        Rank,
-        ID,
-        roomId,
-      });
-      return { ID: user.ID, Rank, roomId: room.ID };
+      return newRank;
     },
   },
-
   Subscription: {
     newRank: {
-      subscribe: withFilter(
-        (_, { roomId, ID, Rank }, { user }) => {
-          if (!user) throw new AuthenticationError("Unauthenticated");
+      subscribe: async (_, { roomId }, { pubsub, user }) => {
+        if (!user) throw new AuthenticationError("Unauthenticated");
 
-          // Subscribe to the channel specific to the room
-          console.log(user);
+        try {
+          const room = await Room.findOne({ ID: roomId });
+
+          if (!room) {
+            throw new UserInputError("Room not found");
+          }
+
+          const isMember = room.members.some((data) => data.ID === user.ID);
+
+          if (!isMember) {
+            throw new UserInputError("Action not allowed");
+          }
 
           return pubsub.asyncIterator(`NEW_RANK_${roomId}`);
-        },
-        async ({ Rank, ID, roomId }, _, { user }) => {
-          // Check if the authenticated user is a member of the room
-          console.log(Rank);
-
-          return true;
+        } catch (error) {
+          throw new Error("An error occurred: " + error.message);
         }
-      ),
+      },
     },
   },
 };

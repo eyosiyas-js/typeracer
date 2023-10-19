@@ -16,6 +16,9 @@ module.exports = gql`
     Rank: String
     roomId: String
   }
+  type SRank {
+    Rank: String
+  }
   type Room {
     name: String!
     password: String
@@ -39,9 +42,18 @@ module.exports = gql`
     message: Message!
     user: User!
   }
+  type Response {
+    rank: String!
+    ID: String!
+    roomId: String!
+  }
+  input RankInfo {
+    rank: String!
+    ID: String!
+    roomId: String!
+  }
   type Query {
     getUsers: [User]!
-    login(username: String!, password: String!): User!
     getMessages(from: String!): [Message]!
   }
   type Mutation {
@@ -50,14 +62,15 @@ module.exports = gql`
       password: String!
       confirmPassword: String!
     ): User!
+    sendRank(rankInfo: RankInfo!): Response!
     login(username: String!, password: String!): User!
     createRoom(name: String!, password: String!): Room!
     joinRoom(name: String!, password: String!): Room!
+    detachRoom(roomId:String!): String!
     sendMessage(to: String!, content: String!): Message!
     reactToMessage(uuid: String!, content: String!): Reaction!
-    sendRank(ID: String!, roomId: String!, Rank: String!): Rank!
   }
   type Subscription {
-    newRank(roomId: String!): Rank
+    newRank(roomId: String!): Response!
   }
 `;

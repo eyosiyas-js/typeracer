@@ -40,6 +40,7 @@ const mongoose = require("mongoose");
   const server = new ApolloServer({
     schema,
     context: contextMiddleware,
+    introspection: true,
     plugins: [
       ApolloServerPluginDrainHttpServer({ httpServer }),
       {

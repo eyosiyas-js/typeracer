@@ -9,6 +9,7 @@ import AuthGuard from "../guards/AuthGuard";
 // components
 import SignUp from "../pages/auth/SignUp";
 import Login from "../pages/auth/Login";
+import LandingPage from "../pages/LandingPage";
 
 // ----------------------------------------------------------------------
 
@@ -67,10 +68,7 @@ export default function Router() {
     {
       path: "/",
       //   element: <MainLayout />,
-      children: [
-        { path: "/", element: <h1>Landing page</h1> },
- 
-      ],
+      children: [{ path: "/", element: <LandingPage /> }],
     },
     { path: "*", element: <Navigate to="/404" replace /> },
   ]);

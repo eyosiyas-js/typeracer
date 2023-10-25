@@ -1,7 +1,9 @@
-import { createContext, useEffect, useReducer } from "react";
+import { createContext, useEffect, useReducer, useState } from "react";
 import PropTypes from "prop-types";
-// utils
 import { isValidToken, setSession } from "../utils/jwt";
+import { gql, useLazyQuery, useMutation } from "@apollo/client";
+import { LOGIN_USER, REGISTER_USER_MUTATION } from "../graphql/mutations";
+import { GET_USER } from "../graphql/querys";
 
 // ----------------------------------------------------------------------
 
@@ -63,23 +65,33 @@ AuthProvider.propTypes = {
 
 function AuthProvider({ children }) {
   const [state, dispatch] = useReducer(reducer, initialState);
+  // const [error, setError] = useState(null);
+
+  const [LogMe] = useLazyQuery(GET_USER);
 
   useEffect(() => {
     const initialize = async () => {
       try {
-        const accessToken = window.localStorage.getItem("accessToken");
+        const accessToken = window.localStorage.getItem("typeracer_token");
 
-        if (accessToken && isValidToken(accessToken)) {
-          setSession(accessToken);
+        if (accessToken) {
+          // setSession(accessToken);
 
-          // const response = await axios.get("/api/account/my-account");
-          const { user } = "response.data";
+          // Perform GraphQL query to fetch user data
+          // const { data } = await client.query({
+          //   query: GET_USER_QUERY,
+          // });
+
+          // const user = data.user;
+
+          const result = await LogMe();
+          // console.log(result.data.getUsers[0]);
 
           dispatch({
             type: "INITIALIZE",
             payload: {
               isAuthenticated: true,
-              user,
+              user: result.data.getUsers[0],
             },
           });
         } else {
@@ -106,38 +118,39 @@ function AuthProvider({ children }) {
     initialize();
   }, []);
 
-  const login = async (email, password) => {
-    // const response = await axios.post("/api/account/login", {
-    //   email,
-    //   password,
-    // });
-    const { accessToken, user } = "response.data;"
+  const [loginUser, { loading, data, error }] = useMutation(LOGIN_USER);
 
-    setSession(accessToken);
-    dispatch({
-      type: "LOGIN",
-      payload: {
-        user,
-      },
-    });
+  const login = async (username, password) => {
+    try {
+      const result = await loginUser({ variables: { username, password } });
+      console.log(result.data.login);
+      localStorage.setItem("typeracer_token", result.data.login.token);
+      dispatch({
+        type: "LOGIN",
+        payload: {
+          user: result.data.login,
+        },
+      });
+      return { data: result.data, error: null };
+    } catch (err) {
+      console.log(err);
+      // 'error' variable now contains the error message if there is an error.
+      return { data: null, error: err.message };
+    }
   };
 
-  const register = async (email, password, firstName, lastName) => {
-    // const response = await axios.post("/api/account/register", {
-    //   email,
-    //   password,
-    //   firstName,
-    //   lastName,
-    // });
-    const { accessToken, user } = "response.data;"
+  const [registerUser] = useMutation(REGISTER_USER_MUTATION);
 
-    window.localStorage.setItem("accessToken", accessToken);
-    dispatch({
-      type: "REGISTER",
-      payload: {
-        user,
-      },
-    });
+  const register = async (username, password, confirmPassword) => {
+    try {
+      const result = await registerUser({
+        variables: { username, password, confirmPassword },
+      });
+      localStorage.setItem("typeracer_token", result.data.register.token);
+      return { data: result.data, error: null };
+    } catch (err) {
+      return { data: null, error: err.message };
+    }
   };
 
   const logout = async () => {

@@ -9,8 +9,9 @@ module.exports = {
     async getUsers(_, args, { user }) {
       return [
         {
-          username: user.ID,
-
+          username: user.username,
+          createdAt: user.createdAt,
+          ID: user.ID,
         },
       ];
     },

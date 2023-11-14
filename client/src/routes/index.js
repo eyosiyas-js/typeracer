@@ -67,8 +67,17 @@ export default function Router() {
 
     {
       path: "/",
-      //   element: <MainLayout />,
-      children: [{ path: "/", element: <LandingPage /> }],
+      // element: <AuthGuard></AuthGuard>,
+      children: [
+        {
+          path: "/",
+          element: (
+            <AuthGuard>
+              <LandingPage />
+            </AuthGuard>
+          ),
+        },
+      ],
     },
     { path: "*", element: <Navigate to="/404" replace /> },
   ]);

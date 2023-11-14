@@ -30,4 +30,37 @@ const REGISTER_USER_MUTATION = gql`
   }
 `;
 
-export { LOGIN_USER, REGISTER_USER_MUTATION };
+const CREATE_ROOM_MUTATION = gql`
+  mutation createRoom($name: String!, $password: String!) {
+    createRoom(name: $name, password: $password) {
+      ID
+      members {
+        ID
+      }
+      name
+      owner
+      status
+    }
+  }
+`;
+
+const JOIN_ROOM_MUTATION = gql`
+  mutation joinRoom($name: String!, $password: String!) {
+    joinRoom(name: $name, password: $password) {
+      ID
+      members {
+        ID
+      }
+      name
+      owner
+      status
+    }
+  }
+`;
+
+export {
+  LOGIN_USER,
+  REGISTER_USER_MUTATION,
+  CREATE_ROOM_MUTATION,
+  JOIN_ROOM_MUTATION,
+};

@@ -3,7 +3,9 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import Modal from "@mui/material/Modal";
-import { FormControl, TextField } from "@mui/material";
+import { Alert, FormControl, Snackbar, TextField } from "@mui/material";
+import { CREATE_ROOM_MUTATION, JOIN_ROOM_MUTATION } from "../graphql/mutations";
+import { useMutation } from "@apollo/client";
 
 const style = {
   position: "absolute",
@@ -39,6 +41,10 @@ const rocketKeyframes = {
 
 export default function RoomModal({ open, handleClose, type }) {
   const [rocketAnimation, setRocketAnimation] = useState(rocketStyle);
+  const [createROOM] = useMutation(CREATE_ROOM_MUTATION);
+  const [joinROOM] = useMutation(JOIN_ROOM_MUTATION);
+  const [name, setName] = useState("");
+  const [password, setPassword] = useState("");
   useEffect(() => {
     setRocketAnimation(rocketStyle);
     console.log("hi");
@@ -55,10 +61,38 @@ export default function RoomModal({ open, handleClose, type }) {
   };
 
   const handleFormSubmit = (e) => {
+    console.log(name, password);
     // Your form submission logic here
-    console.log("hi");
+    if (type === "create") {
+      createROOM({ variables: { name, password } })
+        .then((response) => {
+          setOpenSnakBar(true);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    } else {
+      joinROOM({ variables: { name, password } })
+        .then((response) => {
+          setOpenSnakBar(true);
+        })
+        .catch((err) => {
+          console.log(err.message);
+        });
+    }
+
     // Trigger rocket animation when the button is clicked
     handleRocketFly();
+  };
+
+  const [openSnakBar, setOpenSnakBar] = React.useState(false);
+
+  const handleCloseSnakBar = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setOpenSnakBar(false);
   };
 
   return (
@@ -74,11 +108,18 @@ export default function RoomModal({ open, handleClose, type }) {
             <Typography variant="h5" sx={{ mb: 1, ml: 1 }}>
               {type === "create" ? "Create Room" : "Join Room"}
             </Typography>
-            <TextField placeholder="Room name" type="name" />
+            <TextField
+              placeholder="Room name"
+              type="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
             <TextField
               sx={{ mt: 2 }}
               placeholder="Room password"
               type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
             />
             <Button
               variant="contained"
@@ -125,6 +166,21 @@ export default function RoomModal({ open, handleClose, type }) {
           </Box>
         </Box>
       </Modal>
+      <Snackbar
+        open={openSnakBar}
+        autoHideDuration={6000}
+        onClose={handleCloseSnakBar}
+      >
+        <Alert
+          onClose={handleCloseSnakBar}
+          severity="success"
+          sx={{ width: "100%" }}
+        >
+          {type === "create"
+            ? "Room Created Successfully"
+            : "Room Joined Successfully!!"}
+        </Alert>
+      </Snackbar>
     </div>
   );
 }

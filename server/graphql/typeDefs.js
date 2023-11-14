@@ -1,4 +1,4 @@
-const { gql } = require("apollo-server");
+const { gql } = require('apollo-server')
 
 module.exports = gql`
   type User {
@@ -47,6 +47,10 @@ module.exports = gql`
     ID: String!
     roomId: String!
   }
+
+  type RParagraph {
+    Paragraph: String
+  }
   input RankInfo {
     rank: String!
     ID: String!
@@ -55,6 +59,7 @@ module.exports = gql`
   type Query {
     getUsers: [User]!
     getMessages(from: String!): [Message]!
+    startRoom: Room
   }
   type Mutation {
     register(
@@ -66,11 +71,12 @@ module.exports = gql`
     login(username: String!, password: String!): User!
     createRoom(name: String!, password: String!): Room!
     joinRoom(name: String!, password: String!): Room!
-    detachRoom(roomId:String!): String!
+    detachRoom(roomId: String!): String!
     sendMessage(to: String!, content: String!): Message!
     reactToMessage(uuid: String!, content: String!): Reaction!
   }
   type Subscription {
     newRank(roomId: String!): Response!
+    newParagraph(roomId: String!): RParagraph
   }
-`;
+`

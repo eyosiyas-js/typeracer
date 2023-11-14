@@ -1,9 +1,10 @@
-const usersResolver = require("./users.js");
-const roomsResolver = require("./room.js");
+const usersResolver = require('./users.js')
+const roomsResolver = require('./room.js')
 
 module.exports = {
   Query: {
     ...usersResolver.Query,
+    ...roomsResolver.Query,
   },
   Mutation: {
     ...usersResolver.Mutation,
@@ -12,4 +13,4 @@ module.exports = {
   Subscription: {
     ...roomsResolver.Subscription,
   },
-};
+}

@@ -1,15 +1,17 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-const counterSlice = createSlice({
+const roomSlice = createSlice({
   name: "room",
-  initialState: null,
+  initialState: {
+    value: null,
+  },
   reducers: {
     addRoom: (state, action) => {
-      state.room = action.payload;
+      state.value = action.payload;
     },
-    decrement: (state) => state - 1,
+    removeRoom: (state) => (state.value = null),
   },
 });
 
-export const { addRoom, decrement } = counterSlice.actions;
-export default counterSlice.reducer;
+export const { addRoom, removeRoom } = roomSlice.actions;
+export default roomSlice.reducer;

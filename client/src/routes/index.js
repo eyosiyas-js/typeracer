@@ -10,6 +10,7 @@ import AuthGuard from "../guards/AuthGuard";
 import SignUp from "../pages/auth/SignUp";
 import Login from "../pages/auth/Login";
 import LandingPage from "../pages/LandingPage";
+import RacingPage from "../pages/RacingPage";
 
 // ----------------------------------------------------------------------
 
@@ -76,6 +77,15 @@ export default function Router() {
               <LandingPage />
             </AuthGuard>
           ),
+        },
+      ],
+    },
+    {
+      path: "room",
+      children: [
+        {
+          path: ":id",
+          element: <RacingPage />,
         },
       ],
     },

@@ -6,6 +6,8 @@ import Modal from "@mui/material/Modal";
 import { Alert, FormControl, Snackbar, TextField } from "@mui/material";
 import { CREATE_ROOM_MUTATION, JOIN_ROOM_MUTATION } from "../graphql/mutations";
 import { useMutation } from "@apollo/client";
+import { useDispatch } from "react-redux";
+import { addRoom } from "../redux/roomSlice";
 
 const style = {
   position: "absolute",
@@ -43,8 +45,11 @@ export default function RoomModal({ open, handleClose, type }) {
   const [rocketAnimation, setRocketAnimation] = useState(rocketStyle);
   const [createROOM] = useMutation(CREATE_ROOM_MUTATION);
   const [joinROOM] = useMutation(JOIN_ROOM_MUTATION);
+  const dispatch = useDispatch();
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState(null);
+
   useEffect(() => {
     setRocketAnimation(rocketStyle);
     console.log("hi");
@@ -67,20 +72,23 @@ export default function RoomModal({ open, handleClose, type }) {
       createROOM({ variables: { name, password } })
         .then((response) => {
           setOpenSnakBar(true);
+          dispatch(addRoom(response.data));
         })
         .catch((err) => {
+          setError("Error creating room");
           console.log(err);
         });
     } else {
       joinROOM({ variables: { name, password } })
         .then((response) => {
           setOpenSnakBar(true);
+          dispatch(addRoom(response.data.joinRoom));
         })
         .catch((err) => {
+          setError("Error joining room");
           console.log(err.message);
         });
     }
-
     // Trigger rocket animation when the button is clicked
     handleRocketFly();
   };
@@ -93,6 +101,12 @@ export default function RoomModal({ open, handleClose, type }) {
     }
 
     setOpenSnakBar(false);
+  };
+  const handleCloseError = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+    setError(null);
   };
 
   return (
@@ -174,11 +188,26 @@ export default function RoomModal({ open, handleClose, type }) {
         <Alert
           onClose={handleCloseSnakBar}
           severity="success"
+          variant="filled"
           sx={{ width: "100%" }}
         >
           {type === "create"
             ? "Room Created Successfully"
             : "Room Joined Successfully!!"}
+        </Alert>
+      </Snackbar>
+      <Snackbar
+        open={!!error}
+        autoHideDuration={6000}
+        onClose={handleCloseError}
+      >
+        <Alert
+          onClose={handleCloseError}
+          severity="error"
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
+          {error}
         </Alert>
       </Snackbar>
     </div>

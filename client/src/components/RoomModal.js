@@ -7,7 +7,8 @@ import { Alert, FormControl, Snackbar, TextField } from "@mui/material";
 import { CREATE_ROOM_MUTATION, JOIN_ROOM_MUTATION } from "../graphql/mutations";
 import { useMutation } from "@apollo/client";
 import { useDispatch } from "react-redux";
-import { addRoom } from "../redux/roomSlice";
+import { addRoom, roomSelector } from "../redux/roomSlice";
+import { Navigate, useNavigate } from "react-router-dom";
 
 const style = {
   position: "absolute",
@@ -49,6 +50,7 @@ export default function RoomModal({ open, handleClose, type }) {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     setRocketAnimation(rocketStyle);
@@ -83,6 +85,8 @@ export default function RoomModal({ open, handleClose, type }) {
         .then((response) => {
           setOpenSnakBar(true);
           dispatch(addRoom(response.data.joinRoom));
+          console.log(response.data.joinRoom.ID);
+          navigate(`/room/${response.data.joinRoom.ID}`);
         })
         .catch((err) => {
           setError("Error joining room");

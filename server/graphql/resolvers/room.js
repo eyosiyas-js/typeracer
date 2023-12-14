@@ -46,7 +46,7 @@ module.exports = {
     },
   },
   Mutation: {
-    async createRoom(_, { name, password }, { user }) {
+    async createRoom(_, { name, password }, { user, pubsub }) {
       if (!user) throw new AuthenticationError("Not authorized");
       let Errors = {};
       if (name.trim() === "") Errors.name = "name must not be empty";
@@ -96,9 +96,15 @@ module.exports = {
       if (!found) {
         const joinedRoom = await Room.findOneAndUpdate(
           { name: name },
-          { $push: { members: { ID: user.ID } } },
+          { $push: { members: { ID: user.ID, username } } },
           { new: true }
         );
+        const newUser = {
+          ID: user.ID,
+          username: user.username,
+        };
+        pubsub.publish(`NewUser`, newUser);
+
         return joinedRoom;
       }
       // console.log(joinedRoom)
@@ -184,6 +190,35 @@ module.exports = {
             throw new UserInputError("Action not allowed");
           }
           return pubsub.asyncIterator(`Paragraph_static_room_id`);
+          console.log(k);
+        } catch (error) {
+          throw new Error("An error occurred: " + error.message);
+        }
+      },
+      resolve: (payload) => {
+        // This function will be called each time the subscription yields data
+        console.log("Data received in subscription resolver:", payload);
+        return payload; // You may want to return the payload as is or modify it if needed
+      },
+    },
+    newUser: {
+      subscribe: async (_, { roomId }, { pubsub, user }) => {
+        console.log("Subscription invoked:", { roomId, user, pubsub });
+
+        if (!user) throw new AuthenticationError("Unauthenticated");
+
+        try {
+          const room = await Room.findOne({ ID: roomId });
+
+          if (!room) {
+            throw new UserInputError("Room not found");
+          }
+          const isMember = room.members.some((data) => data.ID === user.ID);
+
+          if (!isMember) {
+            throw new UserInputError("Action not allowed");
+          }
+          return pubsub.asyncIterator(`NewUser`);
           console.log(k);
         } catch (error) {
           throw new Error("An error occurred: " + error.message);

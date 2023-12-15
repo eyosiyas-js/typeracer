@@ -37,7 +37,7 @@ const wsLink = new WebSocketLink({
   options: {
     reconnect: true,
     connectionParams: {
-      Authorization: `${localStorage.getItem("token")}`,
+      Authorization: `${localStorage.getItem("typeracer_token")}`,
     },
   },
 });

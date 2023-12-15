@@ -6,40 +6,40 @@ import {
   Input,
   Typography,
   formControlLabelClasses,
-} from "@mui/material";
-import React, { useEffect, useRef, useState } from "react";
-import { useSelector } from "react-redux";
-import { roomSelector } from "../redux/roomSlice";
-import { useNavigate, useParams } from "react-router-dom";
-import useAuth from "../hooks/useAuth";
-import { gql, useSubscription } from "@apollo/client";
+} from '@mui/material'
+import React, { useEffect, useRef, useState } from 'react'
+import { useSelector } from 'react-redux'
+import { roomSelector } from '../redux/roomSlice'
+import { useNavigate, useParams } from 'react-router-dom'
+import useAuth from '../hooks/useAuth'
+import { gql, useSubscription } from '@apollo/client'
 
 const NEW_PARAGRAPH_SUBSCRIPTION = gql`
-  subscription NewParagraph($roomId: ID!) {
+  subscription NewParagraph($roomId: String!) {
     newParagraph(roomId: $roomId) {
       Paragraph
     }
-  }    
-`;
+  }
+`
 const NEW_USER_SUBSCRIPTION = gql`
   subscription newUser($roomId: String!) {
     newUser(roomId: $roomId) {
-      ID:String
-      username:String!
+      ID
+      username
     }
   }
-`;
+`
 
 function RacingPage() {
-  const room = useSelector(roomSelector);
-  const navigation = useNavigate();
-  const { id } = useParams();
-  const [CarImages, setCarImages] = useState([]);
+  const room = useSelector(roomSelector)
+  const navigation = useNavigate()
+  const { id } = useParams()
+  const [CarImages, setCarImages] = useState([])
 
-  const { data, loading, error } = useSubscription(NEW_PARAGRAPH_SUBSCRIPTION);
-  const { Userdata, Userloading, Usererror } = useSubscription(
-    NEW_USER_SUBSCRIPTION
-  );
+  // const { data, loading, error } = useSubscription(NEW_PARAGRAPH_SUBSCRIPTION)
+  const { data, loading, error } = useSubscription(NEW_USER_SUBSCRIPTION, {
+    variables: { roomId: id },
+  })
 
   useEffect(() => {
     if (room && room.ID === id) {
@@ -47,52 +47,53 @@ function RacingPage() {
         uri: `/static/cars/car_${index}.png`,
         ID: member.ID,
         margin: 0,
-      }));
-      setCarImages(updatedCarImages);
+      }))
+      setCarImages(updatedCarImages)
     } else {
-      navigation("/");
+      navigation('/')
     }
-  }, [room, id]); // Make sure to include room and id in the dependency array
+  }, [room, id]) // Make sure to include room and id in the dependency array
 
   const [initialText, setInitialText] = useState(
-    `That's great news! It seems like your local branch 'main' is already to date with the remote branch 'origin/main'`
-  );
+    `That's great news! It seems like your local branch 'main' is already to date with the remote branch 'origin/main'`,
+  )
 
-  const [value, setValue] = useState(initialText);
-  const [value2, setValue2] = useState(initialText);
-  const [rightChar, setRightChar] = useState([]);
-  const [TextLength, setTextLength] = useState(null);
-  const [freeze, setFreez] = useState(false);
-  const [inputType, setInputType] = useState(null);
+  const [value, setValue] = useState(initialText)
+  const [value2, setValue2] = useState(initialText)
+  const [rightChar, setRightChar] = useState([])
+  const [TextLength, setTextLength] = useState(null)
+  const [freeze, setFreez] = useState(false)
+  const [inputType, setInputType] = useState(null)
 
-  const { user } = useAuth();
+  const { user } = useAuth()
 
   useEffect(() => {
-    if (value2 == "") {
+    if (value2 == '') {
       const updatedCarImages = CarImages.map((car, index) => ({
         ...car,
         margin: 0,
-      }));
-      setCarImages(updatedCarImages);
+      }))
+      setCarImages(updatedCarImages)
     }
-    console.log(value2);
-  }, [value2]);
+    console.log(value2)
+  }, [value2])
+
+  // useEffect(() => {
+  //   if (data) setInitialText(data)
+  // }, [data])
 
   useEffect(() => {
-    if (data) setInitialText(data);
-  }, [data]);
-
-  useEffect(() => {
-    if (Userdata) alert(data);
-  }, [Userdata]);
+    // if (userError) console.log(userError)
+    if (data) alert('joined')
+  }, [data])
 
   const handleInputChange = (event) => {
-    if (event.nativeEvent.inputType == "insertText") {
-      setInputType("yes");
-      console.log("yes");
+    if (event.nativeEvent.inputType == 'insertText') {
+      setInputType('yes')
+      console.log('yes')
     } else {
-      setInputType("no");
-      setFreez(false);
+      setInputType('no')
+      setFreez(false)
 
       // const updatedCarImages = CarImages.map((car, index) => ({
       //   ...car,
@@ -100,18 +101,18 @@ function RacingPage() {
       // }));
       // setCarImages(updatedCarImages);
     }
-    setValue2(event.target.value);
+    setValue2(event.target.value)
 
-    const inputValue = event.target.value;
+    const inputValue = event.target.value
     const coloredText = Array.from(initialText).map((char, index) => {
       if (index < inputValue.length) {
-        const inputChar = inputValue[index];
-        const initialChar = char;
-        const initialChasr = initialText.split("");
+        const inputChar = inputValue[index]
+        const initialChar = char
+        const initialChasr = initialText.split('')
         const correctChars = initialChasr.filter(
-          (char, index) => char === inputValue[index]
-        );
-        setRightChar(correctChars);
+          (char, index) => char === inputValue[index],
+        )
+        setRightChar(correctChars)
 
         if (inputChar === initialChar) {
           // if (event.nativeEvent.inputType == "insertText") {
@@ -129,76 +130,76 @@ function RacingPage() {
           // console.log(char);
 
           return (
-            <span key={index} style={{ color: "green" }}>
+            <span key={index} style={{ color: 'green' }}>
               {char}
             </span>
-          );
+          )
         }
 
-        setFreez(true);
+        setFreez(true)
 
         return (
-          <span key={index} style={{ color: "red" }}>
+          <span key={index} style={{ color: 'red' }}>
             {char}
           </span>
-        );
+        )
       }
-      return char;
-    });
+      return char
+    })
 
     setValue(
-      <Typography sx={{ fontSize: "23px", fontWeight: "medium" }}>
+      <Typography sx={{ fontSize: '23px', fontWeight: 'medium' }}>
         {coloredText}
-      </Typography>
-    );
-  };
+      </Typography>,
+    )
+  }
 
   useEffect(() => {
-    console.log(rightChar);
+    console.log(rightChar)
     CarImages.map((value) => {
-      console.log(value.margin);
-    });
+      console.log(value.margin)
+    })
     if (
       CarImages.some((value) => value.margin >= 540) &&
       rightChar.length >= TextLength
     ) {
-      alert("Done!");
+      alert('Done!')
     }
-  }, [CarImages]);
-  const isFirstRender = useRef(true);
+  }, [CarImages])
+  const isFirstRender = useRef(true)
 
   useEffect(() => {
     if (!isFirstRender.current) {
-      if (inputType === "yes" && !freeze) {
-        let Len = Array.from(initialText).length;
+      if (inputType === 'yes' && !freeze) {
+        let Len = Array.from(initialText).length
         const updatedCarImages = CarImages.map((car, index) => ({
           ...car,
           margin: car.ID === user.ID && car.margin + 540 / Len,
-        }));
-        setCarImages(updatedCarImages);
+        }))
+        setCarImages(updatedCarImages)
       } else if (!freeze) {
-        let Len = Array.from(initialText).length;
+        let Len = Array.from(initialText).length
         const updatedCarImages = CarImages.map((car, index) => ({
           ...car,
           margin: car.ID === user.ID && car.margin - 540 / Len,
-        }));
-        setCarImages(updatedCarImages);
+        }))
+        setCarImages(updatedCarImages)
       }
-      console.log(inputType);
+      console.log(inputType)
     } else {
-      isFirstRender.current = false;
+      isFirstRender.current = false
     }
-  }, [rightChar]);
+  }, [rightChar])
 
   if (CarImages.length == 0) {
-    return <CircularProgress />;
+    return <CircularProgress />
   }
   return (
     <Grid
       style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
       }}
     >
       {/* Car images */}
@@ -206,18 +207,18 @@ function RacingPage() {
         <Grid
           key={index}
           sx={{
-            display: "flex",
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
-            width: "650px",
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            width: '650px',
           }}
         >
           <img
             style={{
-              width: "90px",
-              backgroundColor: "red",
-              height: "50px",
+              width: '90px',
+              backgroundColor: 'red',
+              height: '50px',
               marginLeft: margin,
             }}
             src={uri}
@@ -225,8 +226,8 @@ function RacingPage() {
           />
           {/* Placeholder image, replace with your car image */}
           <img
-            style={{ width: "20px" }}
-            src={"/static/cars/win.png"}
+            style={{ width: '20px' }}
+            src={'/static/cars/win.png'}
             alt={`Placeholder ${index}`}
           />
         </Grid>
@@ -235,29 +236,33 @@ function RacingPage() {
       {/* Displayed text */}
       <Box
         sx={{
-          width: "600px",
+          width: '600px',
           padding: 4,
-          borderRadius: "12px",
-          border: "1px solid gray",
+          borderRadius: '12px',
+          border: '1px solid gray',
           mt: 10,
-          fontSize: "23px",
+          fontSize: '23px',
         }}
       >
         {value}
       </Box>
 
       {/* Input field */}
-      <Box sx={{ width: "600px", mt: 8 }}>
+      <Box sx={{ width: '600px', mt: 8 }}>
         <Input
-          sx={{ fontSize: "23px", fontWeight: "medium" }}
+          sx={{ fontSize: '23px', fontWeight: 'medium' }}
           fullWidth
           multiline
           onChange={handleInputChange}
         />
       </Box>
-      {user.ID === room.owner && <Button>Start</Button>}
+      {user.ID === room.owner && (
+        <Button variant="contained" sx={{ mt: 10 }}>
+          Start
+        </Button>
+      )}
     </Grid>
-  );
+  )
 }
 
-export default RacingPage;
+export default RacingPage

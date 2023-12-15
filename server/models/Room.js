@@ -6,7 +6,7 @@ const roomSchema = new Schema({
   ID: String,
   status: Boolean,
   owner: String,
-  members: [{ ID: String }],
+  members: [{ ID: String, username: String }],
 });
 
 const Room = model("Room", roomSchema, "Room"); // Model name is "Room"

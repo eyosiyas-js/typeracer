@@ -50,10 +50,21 @@ const JOIN_ROOM_MUTATION = gql`
       ID
       members {
         ID
+        username
       }
       name
       owner
       status
+    }
+  }
+`;
+
+const SEND_RANK = gql`
+  mutation sendRank($rankInfo: RankInfo) {
+    sendRank(rankInfo: $rankInfo) {
+      rank: String
+      ID: String
+      roomId: String
     }
   }
 `;
@@ -63,4 +74,5 @@ export {
   REGISTER_USER_MUTATION,
   CREATE_ROOM_MUTATION,
   JOIN_ROOM_MUTATION,
+  SEND_RANK,
 };

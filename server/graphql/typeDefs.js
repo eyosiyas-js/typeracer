@@ -1,4 +1,4 @@
-const { gql } = require('apollo-server')
+const { gql } = require("apollo-server");
 
 module.exports = gql`
   type User {
@@ -9,6 +9,7 @@ module.exports = gql`
   }
   type member {
     ID: String
+    username: String!
   }
 
   type Rank {
@@ -58,8 +59,8 @@ module.exports = gql`
   }
 
   type NewUser {
-    ID:String!
-    username:String!
+    ID: String!
+    username: String!
   }
   type Query {
     getUsers: [User]!
@@ -85,4 +86,4 @@ module.exports = gql`
     newParagraph(roomId: String!): RParagraph
     newUser(roomId: String!): NewUser
   }
-`
+`;

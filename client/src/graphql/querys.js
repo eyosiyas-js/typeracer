@@ -11,4 +11,18 @@ const GET_USER = gql`
   }
 `;
 
-export { GET_USER };
+const START_ROOM = gql`
+  query startRoom {
+    startRoom {
+      ID
+      members {
+        ID
+      }
+      name
+      owner
+      status
+    }
+  }
+`;
+
+export { GET_USER, START_ROOM };

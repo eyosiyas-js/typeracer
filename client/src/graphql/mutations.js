@@ -1,4 +1,4 @@
-import { gql } from "@apollo/client";
+import { gql } from '@apollo/client'
 
 const LOGIN_USER = gql`
   mutation login($username: String!, $password: String!) {
@@ -9,7 +9,7 @@ const LOGIN_USER = gql`
       token
     }
   }
-`;
+`
 
 const REGISTER_USER_MUTATION = gql`
   mutation register(
@@ -28,7 +28,7 @@ const REGISTER_USER_MUTATION = gql`
       token
     }
   }
-`;
+`
 
 const CREATE_ROOM_MUTATION = gql`
   mutation createRoom($name: String!, $password: String!) {
@@ -42,7 +42,7 @@ const CREATE_ROOM_MUTATION = gql`
       status
     }
   }
-`;
+`
 
 const JOIN_ROOM_MUTATION = gql`
   mutation joinRoom($name: String!, $password: String!) {
@@ -57,17 +57,25 @@ const JOIN_ROOM_MUTATION = gql`
       status
     }
   }
-`;
+`
 
 const SEND_RANK = gql`
-  mutation sendRank($rankInfo: RankInfo) {
+  mutation sendRank($rankInfo: RankInfo!) {
     sendRank(rankInfo: $rankInfo) {
-      rank: String
-      ID: String
-      roomId: String
+      rank
+      ID
+      roomId
     }
   }
-`;
+`
+
+const DETACH_ROOM = gql`
+  mutation detachRoom($roomId: String!) {
+    detachRoom(roomId: $roomId) {
+      String
+    }
+  }
+`
 
 export {
   LOGIN_USER,
@@ -75,4 +83,5 @@ export {
   CREATE_ROOM_MUTATION,
   JOIN_ROOM_MUTATION,
   SEND_RANK,
-};
+  DETACH_ROOM
+}

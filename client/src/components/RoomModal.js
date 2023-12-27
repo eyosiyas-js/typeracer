@@ -1,117 +1,118 @@
-import React, { useEffect, useState } from "react";
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import Typography from "@mui/material/Typography";
-import Modal from "@mui/material/Modal";
-import { Alert, FormControl, Snackbar, TextField } from "@mui/material";
-import { CREATE_ROOM_MUTATION, JOIN_ROOM_MUTATION } from "../graphql/mutations";
-import { useMutation } from "@apollo/client";
-import { useDispatch } from "react-redux";
-import { addRoom, roomSelector } from "../redux/roomSlice";
-import { Navigate, useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from 'react'
+import Box from '@mui/material/Box'
+import Button from '@mui/material/Button'
+import Typography from '@mui/material/Typography'
+import Modal from '@mui/material/Modal'
+import { Alert, FormControl, Snackbar, TextField } from '@mui/material'
+import { CREATE_ROOM_MUTATION, JOIN_ROOM_MUTATION } from '../graphql/mutations'
+import { useMutation } from '@apollo/client'
+import { useDispatch } from 'react-redux'
+import { addRoom, roomSelector } from '../redux/roomSlice'
+import { Navigate, useNavigate } from 'react-router-dom'
 
 const style = {
-  position: "absolute",
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
+  position: 'absolute',
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
   width: 400,
-  bgcolor: "background.paper",
-  border: "2px solid #000",
+  bgcolor: 'background.paper',
+  border: '2px solid #000',
   boxShadow: 24,
   p: 4,
-};
+}
 const rocketStyle = {
   marginRight: 50,
   paddingTop: 20,
-  animation: "rocketMotion 1s infinite alternate",
-};
+  animation: 'rocketMotion 1s infinite alternate',
+}
 
 const rocketKeyframes = {
-  "0%": {
-    transform: "translateY(0)",
+  '0%': {
+    transform: 'translateY(0)',
   },
-  "50%": {
-    transform: "translateY(-10px)",
+  '50%': {
+    transform: 'translateY(-10px)',
   },
-  "100%": {
-    transform: "translateY(0)",
+  '100%': {
+    transform: 'translateY(0)',
   },
-};
+}
 
 export default function RoomModal({ open, handleClose, type }) {
-  const [rocketAnimation, setRocketAnimation] = useState(rocketStyle);
-  const [createROOM] = useMutation(CREATE_ROOM_MUTATION);
-  const [joinROOM] = useMutation(JOIN_ROOM_MUTATION);
-  const dispatch = useDispatch();
-  const [name, setName] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState(null);
-  const navigate = useNavigate();
+  const [rocketAnimation, setRocketAnimation] = useState(rocketStyle)
+  const [createROOM] = useMutation(CREATE_ROOM_MUTATION)
+  const [joinROOM] = useMutation(JOIN_ROOM_MUTATION)
+  const dispatch = useDispatch()
+  const [name, setName] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState(null)
+  const navigate = useNavigate()
 
   useEffect(() => {
-    setRocketAnimation(rocketStyle);
-    console.log("hi");
-  }, []);
+    setRocketAnimation(rocketStyle)
+    console.log('hi')
+  }, [])
 
   const handleRocketFly = () => {
     setRocketAnimation({
       ...rocketStyle,
-      animationName: "rocketFly",
-      animationDuration: "1s",
-      animationIterationCount: "1",
-      animationDirection: "normal",
-    });
-  };
+      animationName: 'rocketFly',
+      animationDuration: '1s',
+      animationIterationCount: '1',
+      animationDirection: 'normal',
+    })
+  }
 
   const handleFormSubmit = (e) => {
-    console.log(name, password);
+    console.log(name, password)
     // Your form submission logic here
-    if (type === "create") {
+    if (type === 'create') {
       createROOM({ variables: { name, password } })
         .then((response) => {
-          setOpenSnakBar(true);
-          dispatch(addRoom(response.data));
+          setOpenSnakBar(true)
+          dispatch(addRoom(response.data.createRoom))
+          navigate(`/room/${response.data.createRoom.ID}`)
         })
         .catch((err) => {
-          setError("Error creating room");
-          console.log(err);
-        });
+          setError('Error creating room')
+          console.log(err)
+        })
     } else {
       joinROOM({ variables: { name, password } })
         .then((response) => {
-          setOpenSnakBar(true);
-          dispatch(addRoom(response.data.joinRoom));
-          console.log(response.data.joinRoom.ID);
-          navigate(`/room/${response.data.joinRoom.ID}`);
+          setOpenSnakBar(true)
+          dispatch(addRoom(response.data.joinRoom))
+          console.log(response.data.joinRoom.ID)
+          navigate(`/room/${response.data.joinRoom.ID}`)
         })
         .catch((err) => {
-          setError("Error joining room");
-          console.log(err.message);
-        });
+          setError('Error joining room')
+          console.log(err.message)
+        })
     }
     // Trigger rocket animation when the button is clicked
-    handleRocketFly();
-  };
+    handleRocketFly()
+  }
 
-  const [openSnakBar, setOpenSnakBar] = React.useState(false);
+  const [openSnakBar, setOpenSnakBar] = React.useState(false)
 
   const handleCloseSnakBar = (event, reason) => {
-    if (reason === "clickaway") {
-      return;
+    if (reason === 'clickaway') {
+      return
     }
 
-    setOpenSnakBar(false);
-  };
+    setOpenSnakBar(false)
+  }
   const handleCloseError = (event, reason) => {
-    if (reason === "clickaway") {
-      return;
+    if (reason === 'clickaway') {
+      return
     }
-    setError(null);
-  };
+    setError(null)
+  }
 
   return (
     <div>
@@ -124,7 +125,7 @@ export default function RoomModal({ open, handleClose, type }) {
         <Box sx={style}>
           <div>
             <Typography variant="h5" sx={{ mb: 1, ml: 1 }}>
-              {type === "create" ? "Create Room" : "Join Room"}
+              {type === 'create' ? 'Create Room' : 'Join Room'}
             </Typography>
             <TextField
               placeholder="Room name"
@@ -144,7 +145,7 @@ export default function RoomModal({ open, handleClose, type }) {
               sx={{ ml: 10, mt: 2 }}
               onClick={handleFormSubmit}
             >
-              {type === "join" ? "Join" : "Create"}
+              {type === 'join' ? 'Join' : 'Create'}
             </Button>
           </div>
 
@@ -193,11 +194,11 @@ export default function RoomModal({ open, handleClose, type }) {
           onClose={handleCloseSnakBar}
           severity="success"
           variant="filled"
-          sx={{ width: "100%" }}
+          sx={{ width: '100%' }}
         >
-          {type === "create"
-            ? "Room Created Successfully"
-            : "Room Joined Successfully!!"}
+          {type === 'create'
+            ? 'Room Created Successfully'
+            : 'Room Joined Successfully!!'}
         </Alert>
       </Snackbar>
       <Snackbar
@@ -209,11 +210,11 @@ export default function RoomModal({ open, handleClose, type }) {
           onClose={handleCloseError}
           severity="error"
           variant="filled"
-          sx={{ width: "100%" }}
+          sx={{ width: '100%' }}
         >
           {error}
         </Alert>
       </Snackbar>
     </div>
-  );
+  )
 }

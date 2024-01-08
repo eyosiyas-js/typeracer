@@ -1,12 +1,9 @@
 import { Suspense, lazy } from "react";
 import { Navigate, useRoutes, useLocation } from "react-router-dom";
-// layouts
-
-// guards
+// layouts// guards
 import GuestGuard from "../guards/GuestGuard";
 import AuthGuard from "../guards/AuthGuard";
-// import RoleBasedGuard from '../guards/RoleBasedGuard';
-// components
+// import RoleBasedGuard from '../guards/RoleBasedGuard';// components
 import SignUp from "../pages/auth/SignUp";
 import Login from "../pages/auth/Login";
 import LandingPage from "../pages/LandingPage";

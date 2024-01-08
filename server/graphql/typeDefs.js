@@ -66,6 +66,7 @@ module.exports = gql`
     getUsers: [User]!
     getMessages(from: String!): [Message]!
     startRoom: Room
+    startRandomRoom: String
   }
   type Mutation {
     register(
@@ -85,6 +86,6 @@ module.exports = gql`
     newRank(roomId: String!): Response!
     newParagraph(roomId: String!): RParagraph
     newUser(roomId: String!): NewUser
-    
+    randomRoom: Room!
   }
 `

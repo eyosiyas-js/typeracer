@@ -44,6 +44,16 @@ module.exports = {
         throw error
       }
     },
+    async startRandomRoom(_, args, { pubsub, user }) {
+      if (!user) throw new AuthenticationError('Not authorized')
+      try {
+        pubsub.publish('randomRoom', user)
+        return 'Started'
+      } catch (error) {
+        console.log(error)
+        throw error
+      }
+    },
   },
   Mutation: {
     async createRoom(_, { name, password }, { user, pubsub }) {
@@ -231,6 +241,19 @@ module.exports = {
         // This function will be called each time the subscription yields data
         console.log('Data received in subscription resolver:', payload)
         return payload // You may want to return the payload as is or modify it if needed
+      },
+    },
+    randomRoom: {
+      subscribe: async (_, {}, { pubsub, user }) => {
+        if (!user) throw new AuthenticationError('Unauthenticated')
+        try {
+          return pubsub.asyncIterator(`randomRoom`)
+        } catch (error) {
+          throw new Error('An error occurred: ' + error.message)
+        }
+      },
+      resolve: (payload) => {
+        console.log(payload)
       },
     },
   },

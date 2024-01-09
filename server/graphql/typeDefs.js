@@ -86,6 +86,6 @@ module.exports = gql`
     newRank(roomId: String!): Response!
     newParagraph(roomId: String!): RParagraph
     newUser(roomId: String!): NewUser
-    randomRoom: Room!
+    randomRoom: Room
   }
 `

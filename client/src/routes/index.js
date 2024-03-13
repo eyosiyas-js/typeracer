@@ -61,7 +61,6 @@ export default function Router() {
       ],
     },
 
-    // Dashboard Routes
 
     {
       path: "/",

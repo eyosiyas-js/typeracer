@@ -93,7 +93,7 @@ function RacingPage() {
     } else {
       navigation('/')
     }
-  }, [room, id]) // Make sure to include room and id in the dependency array
+  }, [room, id]) 
 
   const [initialText, setInitialText] = useState(`Waiting ...`)
 
@@ -237,7 +237,7 @@ function RacingPage() {
             ID: user.ID,
             rank: updatedCarImages.find((value) => value.ID === user.ID).margin,
           },
-        }, // Pass your rankInfo object here
+        }, 
       })
       console.log(rightChar)
     } else {
@@ -255,7 +255,6 @@ function RacingPage() {
 
   const StartROOM = async () => {
     try {
-      // Trigger the execution of the query using the startuser function
       startuser()
     } catch (error) {
       console.log(error)

@@ -69,7 +69,6 @@ export default function RoomModal({ open, handleClose, type }) {
 
   const handleFormSubmit = (e) => {
     console.log(name, password)
-    // Your form submission logic here
     if (type === 'create') {
       createROOM({ variables: { name, password } })
         .then((response) => {

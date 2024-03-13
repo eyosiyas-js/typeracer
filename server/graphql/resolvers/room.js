@@ -213,7 +213,7 @@ module.exports = {
       resolve: (payload) => {
         // This function will be called each time the subscription yields data
         console.log("Data received in subscription resolver:", payload);
-        return payload; // You may want to return the payload as is or modify it if needed
+        return payload; 
       },
     },
     newUser: {
@@ -242,7 +242,7 @@ module.exports = {
       resolve: (payload) => {
         // This function will be called each time the subscription yields data
         console.log("Data received in subscription resolver:", payload);
-        return payload; // You may want to return the payload as is or modify it if needed
+        return payload; 
       },
     },
     randomRoom: {

@@ -13,7 +13,6 @@ const resolvers = require('./graphql/resolvers')
 const typeDefs = require('./graphql/typeDefs')
 const mongoose = require('mongoose')
 ;(async function startApolloServer(typeDefs, resolvers) {
-  // Required logic for integrating with Express
   const app = express()
   const httpServer = http.createServer(app)
   const schema = makeExecutableSchema({ typeDefs, resolvers })
@@ -24,7 +23,6 @@ const mongoose = require('mongoose')
     const context = {}
 
     if (req) {
-      // Handle HTTP request context
       const token = req.headers.authorization
       if (token) {
         const user = verify(token, 'mykey')
@@ -32,8 +30,7 @@ const mongoose = require('mongoose')
       }
     }
 
-    context.pubsub = pubsub // Add PubSub to the context
-
+    context.pubsub = pubsub 
     return context
   }
 
@@ -65,7 +62,7 @@ const mongoose = require('mongoose')
       async onConnect(connectionParams, webSocket, context) {
         console.log('Connected!')
         const token = connectionParams.Authorization || ''
-        const user = verify(token, 'mykey') // Replace 'your-secret-key' with your secret key
+        const user = verify(token, 'mykey') 
         return {
           pubsub,
           user,
@@ -90,7 +87,6 @@ const mongoose = require('mongoose')
     console.log('mongodb connected')
   })
 
-  // Modified server startup
   await new Promise((resolve) => httpServer.listen({ port: 4000 }, resolve))
 
   

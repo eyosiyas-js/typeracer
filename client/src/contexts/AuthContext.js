@@ -134,7 +134,6 @@ function AuthProvider({ children }) {
       return { data: result.data, error: null };
     } catch (err) {
       console.log(err);
-      // 'error' variable now contains the error message if there is an error.
       return { data: null, error: err.message };
     }
   };
